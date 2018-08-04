@@ -1,0 +1,421 @@
+<html>
+
+<head>
+    <title>Clojure Basics</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="style.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+</head>
+
+<body>
+    <nav id="navbar">
+        <header>Clojure</header>
+        <hr id="navbar-hr" />
+        <a class="nav-link" href="#Introduction">Introduction</a>
+        <a class="nav-link" href="#Literals">Literals</a>
+        <a class="nav-link" href="#Evaluation">Evaluation</a>
+        <a class="nav-link" href="#REPL">REPL</a>
+        <a class="nav-link" href="#Clojure_Basics">Clojure Basics</a>
+        <a class="nav-link" href="#Test_your_knowledge">Test your knowledge</a>
+    </nav>
+    <main id="main-doc">
+        <section id="Introduction" class="main-section">
+            <header>
+                Introduction
+            </header>
+            <p>
+                Clojure is a dynamic, general-purpose programming language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded programming. Clojure is a compiled language, yet remains completely dynamic – every feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, with optional type hints and type inference, to ensure that calls to Java can avoid reflection.
+            </p>
+            <p>
+                Clojure is a dialect of Lisp, and shares with Lisp the code-as-data philosophy and a powerful macro system. Clojure is predominantly a functional programming language, and features a rich set of immutable, persistent data structures. When mutable state is needed, Clojure offers a software transactional memory system and reactive Agent system that ensure clean, correct, multithreaded designs.
+            </p>
+        </section>
+        <section id="Literals" class="main-section">
+            <header>
+                Literals
+            </header>
+            <p>
+                Below are some examples of literal representations of common primitives in Clojure. The <code>;</code> creates a comment to the end of the line. Sometimes multiple semicolons are used to indicate header lines.
+            </p>
+            <code class="code-block">
+                <pre>;; Numeric types
+42              ; Long - 64-bit integer (from -2^63 to 2^63-1)
+6.022e23        ; Double - double-precision 64-bit floating point
+42N             ; BigInt - arbitrary precision integer
+1.0M            ; BigDecimal - arbitrary precision fixed-point decimal
+22/7            ; Ratio
+
+;; Character types
+"hello"         ; String
+\e              ; Character
+
+;; Other types
+nil             ; null value
+true            ; Boolean (also, false)
+#"[0-9]+"       ; Regular expression
+:alpha          ; Keyword
+:release/alpha  ; Keyword with namespace
+map             ; Symbol
++               ; Symbol - most punctuation allowed
+clojure.core/+  ; Namespaced symbol</pre>
+            </code>
+            <p>
+                All of the literals above are valid Clojure expressions. Clojure also includes literal syntax for four collection types:
+            </p>
+            <code class="code-block">
+                <pre>
+'(1 2 3)     ; list
+[1 2 3]      ; vector
+#{1 2 3}     ; set
+{:a 1, :b 2} ; map</pre>
+            </code>
+            <p>
+                We’ll talk about these in much greater detail later - for now it’s enough to know that these four data structures can be used to create composite data.
+            </p>
+        </section>
+        <section id="Evaluation" class="main-section">
+            <header>
+                Evaluation
+            </header>
+            <p>
+                Next we will consider how Clojure reads and evaluates expressions.
+            </p>
+            <h2>Traditional Evaluation (Java)</h2>
+            <img alt="Traditional Java Evaluation diagramme" src="https://clojure.org/images/content/guides/learn/syntax/traditional-evaluation.png" />
+            <p>
+                In Java, source code (.java files) are read as characters by the compiler (javac), which produces bytecode (.class files) which can be loaded by the JVM.
+            </p>
+            <h2>Clojure Evaluation</h2>
+            <img alt="Clojure Evaluation Diagramme" src="https://clojure.org/images/content/guides/learn/syntax/clojure-evaluation.png" />
+            <p>
+                In Clojure, source code is read as characters by the Reader. The Reader may read the source either from .clj files or be given a series of expressions interactively. The Reader produces Clojure data. The Clojure compiler then produces the bytecode for the JVM. There are two important points here :
+                <ol>
+                    <li>The unit of source code is a Clojure expression, not a Clojure source file. Source files are read as a series of expressions, just as if you typed those expressions interactively at the REPL.</li>
+                    <li>Separating the Reader and the Compiler is a key separation that makes room for macros. Macros are special functions that take code (as data), and emit code (as data). Can you see where a loop for macro expansion could be inserted in the evaluation model?</li>
+                </ol>
+            </p>
+            <h2>Structure vs Semantics</h2>
+            <p>
+                Consider a Clojure expression:
+            </p>
+            <img alt="Clojure Expresssion Diagram" src="https://clojure.org/images/content/guides/learn/syntax/structure-and-semantics.png" />
+            <p>
+                This diagram illustrates the difference between syntax in green (the Clojure data structure produced by the Reader) and semantics in blue (how that data is understood by the Clojure runtime).
+            </p>
+            <p>
+                Most literal Clojure forms evaluate to themselves, except symbols and lists. Symbols are used to refer to something else and when evaluated, return what they refer to. Lists (as in the diagram) are evaluated as invocation.
+            </p>
+            <p>
+                In the diagram, (+ 3 4) is read as a list containing the symbol (+) and two numbers (3 and 4). The first element (where + is found) can be called "function position", that is, a place to find the thing to invoke. While functions are an obvious thing to invoke, there are also a few special operators known to the runtime, macros, and a handful of other invokable things.
+            </p>
+            <p>
+                Considering the evaluation of the expression above:
+            </p>
+            <ul>
+                <li>3 and 4 evaluate to themselves (longs) </li>
+                <li>+ evaluates to a function that implements <code>+</code></li>
+                <li>evaluating the list will invoke the <code>+</code> function with 3 and 4 as arguments</li>
+            </ul>
+            <p>
+                Many languages have both statements and expressions, where statements have some stateful effect but do not return a value. In Clojure, everything is an expression that evaluates to a value. Some expressions (but not most) also have side effects.
+            </p>
+            <p>
+                Now let’s consider how we can interactively evaluate expressions in Clojure.
+            </p>
+            <h2>Delaying evaluation with quoting</h2>
+            <p>
+                Sometimes it’s useful to suspend evaluation, in particular for symbols and lists. Sometimes a symbol should just be a symbol without looking up what it refers to:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> 'x
+x </pre>
+            </code>
+            <p>
+                And sometimes a list should just be a list of data values (not code to evaluate):
+            </p>
+            <code class="code-block">
+                <pre>
+user=> '(1 2 3)
+(1 2 3)</pre>
+            </code>
+            <p>
+                One confusing error you might see is the result of accidentally trying to evaluate a list of data as if it were code:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (1 2 3)
+ClassCastException java.lang.Long cannot be cast to clojure.lang.IFn </pre>
+            </code>
+            <p>
+                For now, don’t worry too much about quote but you will see it occasionally in these materials to avoid evaluation of symbols or lists.
+            </p>
+        </section>
+        <section id="REPL" class="main-section">
+            <header>
+                REPL
+            </header>
+            <p>
+                Most of the time when you are using Clojure, you will do so in an editor or a REPL (Read-Eval-Print-Loop). The REPL has the following parts:
+            </p>
+            <ol>
+                <li>
+                    Read an expression (a string of characters) to produce Clojure data.
+                </li>
+                <li>
+                    Evaluate the data returned from #1 to yield a result (also Clojure data).
+                </li>
+                <li>
+                    Print the result by converting it from data back to characters.
+                </li>
+                <li>
+                    Loop back to the beginning.
+                </li>
+            </ol>
+            <p>
+                One important aspect of #2 is that Clojure always compiles the expression before executing it; Clojure is always compiled to JVM bytecode. There is no Clojure interpreter.
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (+ 3 4)
+7 </pre>
+            </code>
+            <p>
+                The box above demonstrates evaluating an expression (+ 3 4) and receiving a result.
+            </p>
+            <h2>Exploring at the REPL </h2>
+            <p>
+                Most REPL environments support a few tricks to help with interactive use. For example, some special symbols remember the results of evaluating the last three expressions:
+            </p>
+            <ul>
+                <li><code>*1</code> (the last result)</li>
+                <li><code>*2</code> (the result two expressions ago)</li>
+                <li><code>*3</code> (the result three expressions ago)</li>
+            </ul>
+            <code class="code-block">
+                <pre>
+user=> (+ 3 4)
+7
+user=> (+ 10 *1)
+17
+user=> (+ *1 *2)
+24 </pre>
+            </code>
+            <p>
+                In addition, there is a namespace <code>clojure.repl</code> that is included in the standard Clojure library that provides a number of helpful functions. To load that library and make it’s functions available in our current context, call:
+            </p>
+            <code class="code-block">
+(require '[clojure.repl :refer :all])
+            </code>
+            <p>
+                For now, you can treat that as a magic incantation. Poof! We’ll unpack it when we get to namespaces.
+            </p>
+            <p>
+                We now have access to some additional functions that are useful at the REPL: <code>doc</code>, <code>find-doc</code>, <code>apropos</code>, <code>source</code>, and <code>dir</code>.
+            </p>
+            <p>
+                The <code>doc</code> function displays the documentation for any function. Let’s call it on <code>+</code>:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (doc +)
+
+clojure.core/+
+([] [x] [x y] [x y & more])
+  Returns the sum of nums. (+) returns 0. Does not auto-promote
+  longs, will throw on overflow. See also: +' </pre>
+            </code>
+            <p>
+                The doc function prints the documentation for +, including the valid signatures.
+            </p>
+            <p>
+                The doc function prints the documentation, then returns nil as the result - you will see both in the evaluation output.
+            </p>
+            <p>
+                We can invoke <code>doc</code> on itself too:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (doc doc)
+
+clojure.repl/doc
+([name])
+Macro
+  Prints documentation for a var or special form given its name </pre>
+            </code>
+            <p>
+                Not sure what something is called? You can use the <code>apropos</code> command to find functions that match a particular string or regular expression.
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (apropos "+")
+(clojure.core/+ clojure.core/+') </pre>
+            </code>
+            <p>
+                You can also widen your search to include the docstrings themselves with find-doc:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (find-doc "trim")
+
+clojure.core/subvec
+([v start] [v start end])
+  Returns a persistent vector of the items in vector from
+  start (inclusive) to end (exclusive).  If end is not supplied,
+  defaults to (count vector). This operation is O(1) and very fast, as
+  the resulting vector shares structure with the original and no
+  trimming is done.
+
+clojure.string/trim
+([s])
+  Removes whitespace from both ends of string.
+
+clojure.string/trim-newline
+([s])
+  Removes all trailing newline \n or return \r characters from
+  string.  Similar to Perl's chomp.
+
+clojure.string/triml
+([s])
+  Removes whitespace from the left side of string.
+
+clojure.string/trimr
+([s])
+  Removes whitespace from the right side of string. </pre>
+            </code>
+            <p>
+                If you’d like to see a full listing of the functions in a particular namespace, you can use the <code>dir</code> function. Here we can use it on the <code>clojure.repl</code> namespace:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (dir clojure.repl)
+
+apropos
+demunge
+dir
+dir-fn
+doc
+find-doc
+pst
+root-cause
+set-break-handler!
+source
+source-fn
+stack-element-str
+thread-stopper </pre>
+            </code>
+            <p>
+                And finally, we can see not only the documentation but the underlying source for any function accessible by the runtime:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (source dir)
+
+(defmacro dir
+  "Prints a sorted directory of public vars in a namespace"
+  [nsname]
+  `(doseq [v# (dir-fn '~nsname)]
+     (println v#))) </pre>
+            </code>
+            <p>
+                As you go through this workshop, please feel free to examine the docstring and source for the functions you are using. Exploring the implementation of the Clojure library itself is an excellent way to learn more about the language and how it is used.
+            </p>
+            <p>
+                Now let’s consider some Clojure basics to get you going…​.
+            </p>
+        </section>
+        <section id="Clojure_Basics" class="main-section">
+            <header>
+                Clojure Basics
+            </header>
+            <h2>def</h2>
+            <p>
+                When you are evaluating things at a REPL, it can be useful to save a piece of data for later. We can do this with <code>def</code>:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (def x 7)
+#'user/x </pre>
+            </code>
+            <p>
+                <code>def</code> is a special form that associates a symbol (x) in the current namespace with a value (7). This linkage is called a <code>var</code>. In most actual Clojure code, vars should refer to either a constant value or a function, but it’s common to define and re-define them for convenience when working at the REPL.
+            </p>
+            <p>
+                Note the return value above is <code>#'user/x</code> - that’s the literal representation for a var: <code>#'</code> followed by the namespaced symbol. <code>user</code> is the default namespace.
+            </p>
+            <p>
+                Recall that symbols are evaluated by looking up what they refer to, so we can get the value back by just using the symbol:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (+ x x)
+14 </pre>
+            </code>
+            <h2>Printing</h2>
+            <p>
+                One of the most common things you do when learning a language is to print out values. Clojure provides several functions for printing values:
+            </p>
+            <table>
+                <thead>
+                    <td></td>
+                    <td>Human-Readable</td>
+                    <td>Machine-Readable</td>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>With newline</td>
+                        <td>println</td>
+                        <td>prn</td>
+                    </tr>
+                    <tr>
+                        <td>Without newline</td>
+                        <td>print</td>
+                        <td>pr</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                The human-readable forms will translate special print characters (like newlines and tabs) to their expected form and print strings without quotes. We often use <code>println</code> to debug functions or print a value at the REPL. <code>println</code> takes any number of arguments and interposes a space between each argument’s printed value:
+            </p>
+            <code class="code-block"> 
+                <pre>
+user=> (println "What is this:" (+ 1 2))
+What is this: 3 </pre>
+            </code>
+            <p>
+                The println function has side-effects (printing) and returns nil as a result. Note that "What is this:" above did not print the surrounding quotes and is not a string that the Reader could read again in the same way. For that purpose, use the machine-readable version prn:
+            </p>
+            <code class="code-block">
+                <pre>
+user=> (prn "one\n\ttwo")
+"one\n\ttwo" </pre>
+            </code>
+            <p>
+                Note that the printed result is a valid form that the Reader could read again. Both human- and readable- printing functions are useful in different contexts.
+            </p>
+        </section>
+        <section id="Test_your_knowledge" class="main-section">
+            <header>
+                Test your knowledge
+            </header>
+            <ol>
+                <li>
+                    Using the REPL, compute the sum of 7654 and 1234.
+                </li>
+                <li>
+                    Rewrite the following algebraic expression as a Clojure expression: <code> ( 7 + 3 * 4 + 5 ) / 10 </code>.
+                </li>
+                <li>
+                    Using REPL documentation functions, find the documentation for the <code>rem</code> and <code>mod</code> functions. Compare the results of the provided expressions based on the documentation.
+                </li>
+                <li>
+                    Using <code>find-doc</code>, find the function that prints the stack trace of the most recent REPL exception.
+                </li>
+            </ol>
+        </section>
+    </main>
+    <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"> </script>
+</body>
+
+</html>

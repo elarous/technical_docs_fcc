@@ -1,0 +1,95 @@
+body {
+    background-color: #E8EAF6;
+    display: grid;
+    grid-template-columns: 20% 80%;
+    padding: 0px;
+    margin: 0px;
+    color: #212121;
+    font-family: 'Open Sans', sans-serif;
+    line-height: 2rem;
+    font-size: 1.2rem;
+}
+
+#navbar {
+    background-color: #388E3C;
+    color: white;
+    padding: 5px;
+}
+
+@media (max-width: 1200px) {
+    body {
+        display: block;
+    }
+    #navbar {
+        display: none;
+    }
+}
+
+#navbar header {
+    font-size: 3rem;
+    text-align: center;
+    margin: 20px;
+    margin-bottom: 40px;
+}
+
+
+#navbar-hr {
+    border: none;
+    height: 1px;
+    width: 80%;
+    background-color: #E8F5E9 ;
+    background-color: #1B5E20;
+    margin-bottom: 30px;
+}
+
+.nav-link {
+    font-size: 1.5rem;
+    display: block;
+    color: #C8E6C9;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.nav-link:hover {
+    padding-left: 30px;
+    background-color: #C8E6C9;
+    color: #388E3C;
+    transition: 1s background-color, 0.5s color, 1s padding-left ;
+}
+
+#main-doc {
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.main-section {
+    margin: 30px;
+}
+
+.main-section header {
+    color: #1A237E;
+    font-size: 2rem;
+}
+
+h2 {
+    font-size: 1.4rem;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: auto;
+}
+
+code, code pre {
+    font-family: 'Inconsolata', monospace;
+    background-color: #F5F5F5;
+    line-height: 1.4rem;
+    color: #424242;
+}
+
+.code-block pre {
+    padding: 10px;
+    overflow-x: auto;
+}
